@@ -4,14 +4,14 @@ export function clean(text: string): string {
       /-----BEGIN [^-]*PRIVATE KEY-----[\s\S]*?(?:-----END [^-]*PRIVATE KEY-----|$)/g,
       '[REDACTED KEY]',
     )
-    .replace(/(https?:\/\/)[^\s/@]+:[^\s/@]+@/gi, '$1[REDACTED]@')
+    .replace(/(https?:\/\/)[^\s/@]+@/gi, '$1[REDACTED]@')
     .replace(/\bBearer\s+[A-Za-z0-9._~+/=-]+/gi, 'Bearer [REDACTED]')
     .replace(
       /\b(?:sk-(?:proj-)?[\w-]{12,}|AKIA[A-Z0-9]{16}|AIza[\w-]{20,}|gsk_[\w-]{16,}|xai-[\w-]{16,}|gh[pousr]_[\w]{20,})\b/g,
       '[REDACTED]',
     )
     .replace(
-      /([\w.-]*(?:password|passwd|secret|token|api[_-]?key|credential)[\w.-]*["']?\s*(?:=>|[:=])\s*)(?:"[^"\r\n]*"|'[^'\r\n]*'|[^\s,;]+)/gi,
+      /([\w.-]*(?:password|passwd|secret|token|api[_-]?key|credential)[\w.-]*["']?\s*(?:=>|[:=])\s*)(?:`[^`]*`|"[^"\r\n]*"|'[^'\r\n]*'|[^\s,;]+)/gi,
       '$1[REDACTED]',
     )
     .replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, '[REDACTED EMAIL]')

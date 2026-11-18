@@ -8,10 +8,11 @@ of analyzed project dependencies. Built for **#OneToolEveryWeek** by Amr Achraf.
 
 ## Install and run
 
-Requirements: Node **22.14+**, **24**, or **26**, Git **2.43+** on PATH, and a local
+Requirements: Node **22.14+**, **24**, or **26**, Git **2.46+** on PATH, and a local
 working tree. These LTS lines are covered by the compatibility workflow, including
 the minimum Node version; a green run is the evidence for a particular release.
-Git 2.43 is the minimum for lazy-fetch suppression; time filtering needs 2.37+.
+Git 2.46 is the conservative minimum for lazy-fetch suppression (documented in
+Git 2.45.1); time filtering needs 2.37+.
 
 ```sh
 npm install --save-dev @amrachraf6690/wtf-happened
@@ -154,7 +155,7 @@ behavior. Dependency/generated and documentation paths do not acquire source rol
 Tests take precedence over controller/service suffixes.
 
 Default module roots, in order:
-`packages/@*/*`, `packages/*`, `apps/*`, `services/*`, `modules/*`, `src/modules/*`,
+`packages/@*/*`, `packages/*/*`, `packages/*`, `apps/*`, `services/*`, `modules/*`, `src/modules/*`,
 `src/features/*`, `src/domain/*`, `src/domains/*`, `domain/*`, `domains/*`.
 With default roots, bounded frozen-HEAD package.json npm/Yarn workspaces,
 simple pnpm-workspace.yaml package lists and Nx workspaceLayout add hints after
@@ -163,7 +164,10 @@ Complex YAML/globs are not inferred; configure explicit roots. An explicit root
 list disables automatic hints and replaces defaults. For vendor-style roots use
 `packages/*/*` before `packages/*`, with a narrower vendor prefix if ambiguous.
 
-`*` matches characters within one segment, `**` crosses segments, `?` matches one
+`packages/*/*` skips conventional source directory names such as `src` and `lib`
+to distinguish vendor/package roots. Use explicit roots for ambiguous layouts.
+
+`*` matches a nonempty segment, `**` crosses zero or more segments, `?` matches one
 character. No braces, extglobs or negation. First matching root wins; first custom
 category rule wins before built-ins. Omitted `review` is false. Lists replace,
 so include default entries when extending. Module/category counts deduplicate
@@ -262,7 +266,8 @@ is not implemented; compatible gateways can use custom.
   paths/status/categories/modules and opaque IDs. No authors, remotes, absolute
   paths, full commit bodies or working-tree source. Excerpts require both consents.
 - Source allowlist: JS/TS variants, Vue/Svelte under recognized src/app/pages/routes/
-  server/lib/components/composables/hooks/database/prisma/drizzle/tests and module
+  server/lib/components/composables/hooks/database/prisma/drizzle/tests, conventional
+  api/middleware/plugins/stores/utils/controllers/services/models/jobs, and module
   roots. Config/environment/credential/key/certificate files, lockfiles, generated/
   dependency/build/cache output, binary/invalid UTF-8, symlink/submodule and oversized
   blobs are excluded. Both rename paths are checked before reading blobs.

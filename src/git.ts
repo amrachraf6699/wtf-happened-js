@@ -112,6 +112,17 @@ export class GitReader {
     return { code: r.code, text: decode(r.data) };
   }
   async discover(explicit: boolean): Promise<{ root: string; scope: string }> {
+    const version = /git version (\d+)\.(\d+)/.exec(
+      (await this.text(['--version'])).text,
+    );
+    if (
+      !version ||
+      Number(version[1]) < 2 ||
+      (Number(version[1]) === 2 && Number(version[2]) < 46)
+    )
+      throw new Failure(
+        'Git 2.46 or newer is required for bounded offline analysis.',
+      );
     if (
       (
         await this.text(['rev-parse', '--is-bare-repository'], true)
@@ -207,8 +218,12 @@ export class GitReader {
       const sym = await this.text(['symbolic-ref', '--quiet', 'HEAD'], true);
       if (
         sym.code !== 0 ||
-        (await this.run(['show-ref', '--verify', sym.text.trim()], true))
-          .code === 0
+        (
+          await this.run(
+            ['show-ref', '--verify', '--quiet', sym.text.trim()],
+            true,
+          )
+        ).code !== 1
       )
         throw new Failure(
           'Cannot resolve HEAD; check missing or corrupt objects.',
@@ -283,6 +298,7 @@ export class GitReader {
             'show',
             '--no-patch',
             '--no-show-signature',
+            '--no-use-mailmap',
             '--format=%ct%x00%ae%x00%an%x00%s',
             hash,
             '--',

@@ -1,6 +1,7 @@
 import type { Config } from './types.js';
 export const ROOTS = [
   'packages/@*/*',
+  'packages/*/*',
   'packages/*',
   'apps/*',
   'services/*',
@@ -17,20 +18,23 @@ export function validPattern(p: unknown): p is string {
     typeof p === 'string' &&
     p.length > 0 &&
     p.length <= 256 &&
-    !/(?:^\/|\.\.|\\|:|[\x00-\x1f])/.test(p)
+    !/(?:^\/|\.\.|\\|:|[\x00-\x1f]|[!{}\[\]])/.test(p) &&
+    (p.match(/\*/g)?.length ?? 0) <= 12
   );
 }
 export function glob(p: string): string {
   return p
-    .split(/(\*\*|\*|\?)/)
+    .split(/(\*\*\/|\*\*|\*|\?)/)
     .map((s) =>
-      s === '**'
-        ? '.*'
-        : s === '*'
-          ? '[^/]*'
-          : s === '?'
-            ? '[^/]'
-            : s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'),
+      s === '**/'
+        ? '(?:.*/)?'
+        : s === '**'
+          ? '.*'
+          : s === '*'
+            ? '[^/]+'
+            : s === '?'
+              ? '[^/]'
+              : s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'),
     )
     .join('');
 }
@@ -100,13 +104,20 @@ export function classify(path: string, config: Config['analysis']) {
   for (const root of config.module_roots) {
     const m = new RegExp(`^(${glob(root)})/.+$`, 'i').exec(path);
     if (m) {
+      if (
+        root === 'packages/*/*' &&
+        /\/(?:src|lib|app|routes|database|tests?|config|components|hooks|pages|dist|node_modules)$/i.test(
+          m[1]!,
+        )
+      )
+        continue;
       module = m[1]!;
       break;
     }
   }
   const source =
     module !== null ||
-    /^(?:src|app|pages|routes|server|lib|components|composables|hooks|database|prisma|drizzle|test|tests)\//i.test(
+    /^(?:src|app|pages|routes|server|lib|components|composables|hooks|database|prisma|drizzle|test|tests|api|middleware|plugins|stores|utils|controllers|services|models|jobs)\//i.test(
       path,
     );
   for (const rule of config.category_rules)
@@ -143,7 +154,8 @@ export function classify(path: string, config: Config['analysis']) {
   )
     category = 'Infrastructure';
   else if (
-    /(?:^|\/)(?:config|configuration)\/|(?:^|[.])(?:config|rc)\.|^(?:\.[^.]+rc|tsconfig[^/]*|nx\.json|turbo\.json|pnpm-workspace\.yaml|\.env.*)$/.test(
+    /(?:^|\/)(?:config|configuration)\//.test(p) ||
+    /(?:^|[.])(?:config|rc)\.|^(?:\.[^.]+rc|tsconfig[^/]*|nx\.json|turbo\.json|pnpm-workspace\.yaml|\.env.*)$/.test(
       file,
     )
   )
@@ -199,7 +211,7 @@ export function classify(path: string, config: Config['analysis']) {
     reviewCategories.has(category) ||
     (source &&
       category !== 'Tests' &&
-      /^(?:auth|login|payment|checkout|webhook|billing|stripe|paypal)(?:[._-]|[A-Z])/.test(
+      /^(?:[Aa]uth(?:entication|orization)?|[Ll]ogin|[Pp]ayment|[Cc]heckout|[Ww]ebhook|[Bb]illing|[Ss]tripe|[Pp]aypal)(?:[._-]|[A-Z])/.test(
         path.split('/').at(-1)!,
       ));
   return { category, module, source, review };

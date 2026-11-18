@@ -38,8 +38,7 @@ export function settings(config: Config['ai']) {
     base.includes('?') ||
     base.includes('#') ||
     (!loopback && url.protocol !== 'https:') ||
-    (url.protocol === 'http:' &&
-      !/^(?:localhost|127\.0\.0\.1|\[::1\])(?::\d+)?$/.test(host))
+    (loopback && !/^(?:localhost|127\.0\.0\.1|\[::1\])(?::\d+)?$/.test(host))
   )
     throw new Failure(
       'AI URL requires HTTPS except exact loopback, without credentials, query or fragment.',

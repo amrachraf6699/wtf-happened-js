@@ -1,6 +1,6 @@
 # Contributing
 
-Use Node 22.14+, 24, or 26 and Git 2.43+. Install with `npm ci`, then run
+Use Node 22.14+, 24, or 26 and Git 2.46+. Install with `npm ci`, then run
 `npm run check`. Runtime has no third-party dependencies. TypeScript, ESLint and
 Prettier are development tools. `npm run format` applies LF formatting.
 

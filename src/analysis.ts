@@ -22,12 +22,13 @@ export function summarize(
       });
     }
   }
-  const count = (items: string[]) =>
-    Object.fromEntries(
-      [...new Set(items)]
-        .sort()
-        .map((k) => [k, items.filter((v) => v === k).length]),
+  const count = (items: string[]) => {
+    const counts = new Map<string, number>();
+    for (const item of items) counts.set(item, (counts.get(item) ?? 0) + 1);
+    return Object.fromEntries(
+      [...counts].sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0)),
     );
+  };
   report.changes.files = [...files.values()].sort((a, b) =>
     a.path < b.path ? -1 : a.path > b.path ? 1 : 0,
   );
