@@ -1,0 +1,62 @@
+{
+  "name": "@amrachraf6690/wtf-happened",
+  "version": "1.0.1",
+  "description": "You were gone. Your code wasn't. Here's WTF happened. Read-only local Git catch-up with optional AI.",
+  "type": "module",
+  "license": "MIT",
+  "author": "Amr Achraf",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/amrachraf6699/wtf-happened-js.git"
+  },
+  "homepage": "https://github.com/amrachraf6699/wtf-happened-js#readme",
+  "bugs": "https://github.com/amrachraf6699/wtf-happened-js/issues",
+  "keywords": [
+    "git",
+    "cli",
+    "catch-up",
+    "typescript",
+    "developer-tools",
+    "OneToolEveryWeek"
+  ],
+  "engines": {
+    "node": "^22.14.0 || ^24.0.0 || ^26.0.0"
+  },
+  "bin": {
+    "wtf-happened": "dist/cli.js"
+  },
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "node --test test/*.test.mjs",
+    "pack:verify": "node scripts/pack.mjs",
+    "check": "npm run typecheck && npm run lint && npm run format:check && npm run build && npm test && npm run pack:verify"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "eslint": "^9.39.5",
+    "prettier": "^3.10.1",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.73.0"
+  }
+}
