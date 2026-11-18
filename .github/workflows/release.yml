@@ -1,0 +1,31 @@
+name: Prepare verified release
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  compatibility:
+    uses: ./.github/workflows/ci.yml
+  artifact:
+    needs: compatibility
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+      - run: npm ci
+      - run: npm run build
+      - run: npm run pack:verify
+      - uses: actions/upload-artifact@v4
+        with:
+          name: npm-${{ github.sha }}
+          path: '*.tgz'
+          if-no-files-found: error
+      # Bootstrap is a manual publish of this validated artifact after account login.
+      # No tag-triggered publisher races that path. See CONTRIBUTING.md.
