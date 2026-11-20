@@ -1,10 +1,9 @@
 # Changelog
 
-## 1.0.1
+## 1.0.1 — 2026-11-20
 
 First Node.js implementation of WTF Happened?, matching the Laravel package's
-stable release version. Registry publication and release date are recorded only
-after the compatibility matrix and publication succeed.
+stable release version.
 
 - Framework-independent, read-only Git catch-up with subtree and ancestor ranges.
 - Node ecosystem classification, affected modules, deterministic review suggestions.

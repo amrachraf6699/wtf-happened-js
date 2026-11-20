@@ -28,7 +28,9 @@ This is a separate implementation/history; no PHP dependencies are required.
    push it, and create a GitHub release with install instructions.
 5. Bootstrap path for this new npm package: browser-based `npm login` as
    **amrachraf6690**, verify `npm whoami --registry=https://registry.npmjs.org`, then
-   `npm publish amrachraf6690-wtf-happened-1.0.1.tgz --access public --tag latest`.
+   `npm run release:publish`. This gates the single tarball publish on a clean
+   tree, matching annotated tag, all six exact-SHA compatibility jobs, GitHub
+   release, expected npm account, absent registry version and matching SHA-512.
    Complete npm's interactive 2FA in the terminal/browser. Do not put credentials
    in repository files or chat. No automatic publish workflow runs in parallel.
 6. Verify registry version, repository metadata, latest dist-tag, and install

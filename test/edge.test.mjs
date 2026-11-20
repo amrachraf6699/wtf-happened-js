@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { writeFile, readFile, symlink, mkdir } from 'node:fs/promises';
+import { writeFile, readFile, symlink } from 'node:fs/promises';
+import { execFileSync } from 'node:child_process';
 import { join } from 'node:path';
 import { analyze } from '../dist/index.js';
 import { GitReader } from '../dist/git.js';
@@ -143,27 +144,36 @@ test(
     );
   },
 );
-test(
-  'invalid UTF-8 filename cannot select a different blob',
-  {
-    skip:
-      process.platform === 'win32' ? 'Windows filenames use Unicode' : false,
-  },
-  async (t) => {
-    const f = await fixture(t);
-    await mkdir(join(f.root, 'src'));
-    const path = Buffer.concat([
-      Buffer.from(join(f.root, 'src') + '/'),
+test('invalid UTF-8 filename cannot select a different blob', async (t) => {
+  const f = await fixture(t);
+  // Store bytes in Git directly: APFS/Windows reject them as filesystem names.
+  const plumbing = (args, input) =>
+    execFileSync('git', args, {
+      cwd: f.root,
+      env,
+      input,
+      encoding: 'utf8',
+    }).trim();
+  const blob = plumbing(['hash-object', '-w', '--stdin'], 'private');
+  const tree = plumbing(
+    ['mktree', '-z'],
+    Buffer.concat([
+      Buffer.from(`100644 blob ${blob}\t`),
       Buffer.from([255]),
-      Buffer.from('.ts'),
-    ]);
-    await writeFile(path, 'private');
-    f.commit();
-    const r = await analyze({ cwd: f.root }, { env });
-    assert.equal(r.exitCode, 1);
-    assert.match(r.report.error, /non-UTF-8/);
-  },
-);
+      Buffer.from('.ts\0'),
+    ]),
+  );
+  const commit = plumbing([
+    'commit-tree',
+    tree,
+    '-m',
+    'Invalid filename fixture',
+  ]);
+  f.git(['update-ref', 'refs/heads/main', commit]);
+  const r = await analyze({ cwd: f.root }, { env });
+  assert.equal(r.exitCode, 1);
+  assert.match(r.report.error, /non-UTF-8/);
+});
 test('source submodule modes never produce excerpts', async (t) => {
   const f = await fixture(t);
   await f.write('a', 'x');
